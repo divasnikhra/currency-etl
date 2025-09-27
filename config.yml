@@ -1,0 +1,21 @@
+api:
+  endpoint: "https://api.cnb.cz/cnbapi/exrates/daily"
+  lang: "EN"
+  timeout_seconds: 10
+  max_retries: 3
+  backoff_seconds: 2
+
+db:
+  host: "localhost"
+  port: 5432
+  dbname: "postgres"
+  user: "postgres"
+  password: "admin"
+  schema: "msd_financial_db"
+  daily_table: "currency_rates_daily"
+  weekly_table: "currency_rates_weekly_avg"
+
+run:
+  run_type: "daily"   # daily | full
+  start_date: "2025-09-01"
+  end_date: "2025-09-27"
