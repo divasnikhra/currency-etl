@@ -1,8 +1,10 @@
 """Orchestration script. Loads config, runs fetch -> transform -> load."""
+
 import argparse
 import yaml
 from datetime import date, timedelta
 from dateutil import parser as date_parser
+from typing import Optional
 from src.utils.logger import get_logger
 from src.db import get_conn, apply_ddl
 from src.etl.fetcher import fetch_for_date
@@ -32,7 +34,7 @@ def get_dates_for_run(run_cfg):
         raise ValueError("Unsupported run_type in config")
 
 
-def run(cfg_path: str, run_type: str = None):
+def run(cfg_path: str, run_type: Optional[str] = None):
     with open(cfg_path) as fh:
         cfg = yaml.safe_load(fh)
 
