@@ -1,4 +1,5 @@
 """
+This is for testing purpose and not part of actual code
 Single-file ETL script for Visual Studio (VS Code)
 Fetches currency rates daily/full, inserts into Postgres, computes weekly averages.
 """
