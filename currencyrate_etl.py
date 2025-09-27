@@ -72,19 +72,19 @@ def get_conn(db_cfg):
         password=db_cfg["password"]
     )
     conn.autocommit = False
-    print("✅ Connected to Postgres")
+    print("Connected to Postgres")
     return conn
 
 def apply_ddl_if_needed(conn):
-    print("📄 Applying DDL (create schema/tables if not exists)...")
+    print("Applying DDL (create schema/tables if not exists)...")
     cur = conn.cursor()
     try:
         cur.execute(DDL)
         conn.commit()
-        print("✅ DDL applied.")
+        print("DDL applied.")
     except Exception as e:
         conn.rollback()
-        print("❌ Failed to apply DDL:", e)
+        print("Failed to apply DDL:", e)
         raise
     finally:
         cur.close()
@@ -93,7 +93,7 @@ def get_dates_for_run(run_cfg):
     run_type = run_cfg.get("run_type", "daily").lower()
     if run_type == "daily":
         today = date.today()
-        print(f"📅 Run type = daily. Will fetch for {today}")
+        print(f"Run type = daily. Will fetch for {today}")
         return [today]
     elif run_type == "full":
         start = date_parser.parse(run_cfg["start_date"]).date()
@@ -115,10 +115,10 @@ def fetch_data_for_date(endpoint, date_obj, lang="EN", timeout=10):
         resp = requests.get(url, timeout=timeout)
         resp.raise_for_status()
         data = resp.json()
-        print(f"✅ Fetched {len(data.get('rates', []))} rates for {date_str}")
+        print(f"Fetched {len(data.get('rates', []))} rates for {date_str}")
         return data
     except Exception as e:
-        print(f"⚠️ Failed to fetch for {date_str}: {e}")
+        print(f"Failed to fetch for {date_str}: {e}")
         return None
 
 def build_dataframe(dates, api_cfg):
@@ -141,14 +141,14 @@ def build_dataframe(dates, api_cfg):
                 "rate": rate
             })
     df = pd.DataFrame(all_rows)
-    print(f"✅ DataFrame created with {len(df)} rows")
+    print(f"DataFrame created with {len(df)} rows")
     if not df.empty:
         print(df.head())
     return df
 
 def upsert_daily_rows(conn, schema, daily_table, df):
     if df.empty:
-        print("ℹ️ No daily rows to write.")
+        print("ℹNo daily rows to write.")
         return
     records = df.to_dict("records")
     values = []
@@ -170,10 +170,10 @@ def upsert_daily_rows(conn, schema, daily_table, df):
         """
         psycopg2.extras.execute_values(cur, query, values, page_size=100)
         conn.commit()
-        print(f"✅ Upserted {len(values)} daily rows")
+        print(f"Upserted {len(values)} daily rows")
     except Exception as e:
         conn.rollback()
-        print("❌ Failed daily upsert:", e)
+        print("Failed daily upsert:", e)
         raise
     finally:
         cur.close()
@@ -196,18 +196,18 @@ def compute_weekly_averages_from_df(df):
         return (start + timedelta(weeks=w-1))
     grouped["week_start_date"] = grouped.apply(lambda r: iso_week_start(int(r["iso_year"]), int(r["iso_week"])), axis=1)
     grouped["avg_rate"] = grouped["avg_rate"].round(8)
-    print(f"✅ Computed weekly averages: {len(grouped)} rows")
+    print(f"Computed weekly averages: {len(grouped)} rows")
     return grouped
 
 def insert_weekly_rows(conn, schema, weekly_table, weekly_df, run_type="daily"):
     if weekly_df.empty:
-        print("ℹ️ No weekly rows to insert.")
+        print("No weekly rows to insert.")
         return
     cur = conn.cursor()
     try:
         if run_type == "full":
             weeks = set((int(r.iso_year), int(r.iso_week)) for r in weekly_df.itertuples())
-            print(f"🗑️ Full load: replacing weeks {weeks}")
+            print(f"Full load: replacing weeks {weeks}")
             for y,w in weeks:
                 cur.execute(f"DELETE FROM {schema}.{weekly_table} WHERE iso_year=%s AND iso_week=%s", (y,w))
         values = []
@@ -225,10 +225,10 @@ def insert_weekly_rows(conn, schema, weekly_table, weekly_df, run_type="daily"):
         """
         psycopg2.extras.execute_values(cur, insert_q, values, page_size=100)
         conn.commit()
-        print(f"✅ Inserted/Updated {len(values)} weekly rows")
+        print(f"Inserted/Updated {len(values)} weekly rows")
     except Exception as e:
         conn.rollback()
-        print("❌ Weekly insert failed:", e)
+        print("Weekly insert failed:", e)
         raise
     finally:
         cur.close()
@@ -248,10 +248,10 @@ def run():
         upsert_daily_rows(conn, db_cfg["schema"], db_cfg["daily_table"], df)
         weekly_df = compute_weekly_averages_from_df(df)
         insert_weekly_rows(conn, db_cfg["schema"], db_cfg["weekly_table"], weekly_df, run_type=run_cfg["run_type"])
-        print("🏁 ETL completed successfully.")
+        print("ETL completed successfully.")
     finally:
         conn.close()
-        print("🔒 DB connection closed.")
+        print("DB connection closed.")
 
 # VS-friendly entry point
 if __name__ == "__main__":

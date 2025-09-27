@@ -1,9 +1,5 @@
 api:
   endpoint: "https://api.cnb.cz/cnbapi/exrates/daily"
-  lang: "EN"
-  timeout_seconds: 10
-  max_retries: 3
-  backoff_seconds: 2
 
 db:
   host: "localhost"
