@@ -25,4 +25,4 @@ jobs:
 
       - name: Run ETL script
         run: |
-          python src/main.py --run_type delta
+          python main.py --run_type full
