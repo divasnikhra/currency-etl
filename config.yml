@@ -12,6 +12,6 @@ db:
   weekly_table: "currency_rates_weekly_avg"
 
 run:
-  run_type: "daily"   # daily | full
+  run_type: "full"   # daily | full
   start_date: "2025-09-01"
-  end_date: "2025-09-27"
+  end_date: "2025-10-9"
